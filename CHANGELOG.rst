@@ -7,6 +7,7 @@ Change Log
 - [ADDED] pf2pp: possibility to convert a specific variant and scenario
 - [ADDED] Static Var Compensator with Voltage Control
 - [ADDED] creating series capacitor added in pf to pp converter
+- [ADDED] pf2pp: min/max q_mvar and min/max p_mw limits for sgens and gen will be converted
 - [ADDED] low voltage grid Schutterwald
 - [FIXED] trafo3w with tap changer at star point corrected
 - [FIXED] namespace changes from numpy 2.0 release
