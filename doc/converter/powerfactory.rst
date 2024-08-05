@@ -28,6 +28,8 @@ The documentation describes how to use the exporter as a function in "Engine mod
  - ElmZpu (pu Impedance)
  - ElmSind (Series Reactor)
  - ElmSvs (Static Var Compensator with Voltage Control)
+ - Elmscap (Series Capacitor)
+
 
  
 Setup PowerFactory and Python

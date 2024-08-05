@@ -6,6 +6,7 @@ Change Log
 
 - [ADDED] pf2pp: possibility to convert a specific variant and scenario
 - [ADDED] Static Var Compensator with Voltage Control
+- [ADDED] creating series capacitor added in pf to pp converter
 - [ADDED] low voltage grid Schutterwald
 - [FIXED] trafo3w with tap changer at star point corrected
 - [FIXED] namespace changes from numpy 2.0 release
