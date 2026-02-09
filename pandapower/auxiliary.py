@@ -75,7 +75,7 @@ try:
     geopandas_available = True
 except ImportError:
     geopandas_available = False
-    
+
 
 PyPowerNetwork = dict[str, Any]
 NumpyDType = TypeVar("NumpyDType", bound=np.generic, covariant=True)
@@ -1384,6 +1384,7 @@ def _add_ppc_options(
     check_connectivity: bool,
     mode: Literal["opf", "pf", "pf_3ph", "sc", "nx", "se", "dc"],
     switch_rx_ratio: int,
+    enforce_p_lims: bool,
     enforce_q_lims: bool,
     recycle: dict[str, bool] | None,
     delta: float = 1e-10,
@@ -1415,6 +1416,7 @@ def _add_ppc_options(
         "check_connectivity": check_connectivity,
         "mode": mode,
         "switch_rx_ratio": switch_rx_ratio,
+        "enforce_p_lims": enforce_p_lims,
         "enforce_q_lims": enforce_q_lims,
         "recycle": recycle,
         "voltage_depend_loads": voltage_depend_loads,
@@ -2042,6 +2044,7 @@ def _init_runpp_options(
     tolerance_mva: float,
     trafo_model: Literal["t", "pi"],
     trafo_loading: Literal["current", "power"],
+    enforce_p_lims: bool,
     enforce_q_lims: bool,
     check_connectivity: bool,
     voltage_depend_loads: bool,
@@ -2091,7 +2094,7 @@ def _init_runpp_options(
     tdpf_update_r_theta = overrule_options.get("tdpf_update_r_theta", tdpf_update_r_theta)
     tdpf_delay_s = overrule_options.get("tdpf_delay_s", tdpf_delay_s)
     # the other parameters do not need to be collected manually:
-    # tolerance_mva, trafo_model, trafo_loading, enforce_q_lims, check_connectivity, consider_line_temperature
+    # tolerance_mva, trafo_model, trafo_loading, enforce_p_lims, enforce_q_lims, check_connectivity, consider_line_temperature
 
     # check if numba is available and the corresponding flag
     if numba:
@@ -2190,8 +2193,8 @@ def _init_runpp_options(
     _add_ppc_options(net, calculate_voltage_angles=calculate_voltage_angles,
                      trafo_model=trafo_model, check_connectivity=check_connectivity,
                      mode=mode, switch_rx_ratio=switch_rx_ratio, init_vm_pu=_vm_pu,
-                     init_va_degree=_va_deg, enforce_q_lims=enforce_q_lims, recycle=recycle,
-                     voltage_depend_loads=voltage_depend_loads, delta=delta_q,
+                     init_va_degree=_va_deg, enforce_p_lims=enforce_p_lims, enforce_q_lims=enforce_q_lims,
+                     recycle=recycle, voltage_depend_loads=voltage_depend_loads, delta=delta_q,
                      trafo3w_losses=trafo3w_losses,
                      neglect_open_switch_branches=neglect_open_switch_branches,
                      consider_line_temperature=consider_line_temperature,
@@ -2209,7 +2212,7 @@ def _init_nx_options(net: pandapowerNet) -> None:
     _add_ppc_options(net, calculate_voltage_angles=False,
                      trafo_model="t", check_connectivity=False,
                      mode="nx", switch_rx_ratio=2, init_vm_pu='flat', init_va_degree="flat",
-                     enforce_q_lims=False, recycle=None,
+                     enforce_p_lims=False, enforce_q_lims=False, recycle=None,
                      voltage_depend_loads=False, delta=0, trafo3w_losses="hv")
 
 
@@ -2230,6 +2233,7 @@ def _init_rundcpp_options(
 
     # the following parameters have no effect if ac = False
     calculate_voltage_angles: bool = True
+    enforce_p_lims: bool = False
     enforce_q_lims: bool = False
     algorithm = None
     max_iteration = None
@@ -2239,7 +2243,7 @@ def _init_rundcpp_options(
     _add_ppc_options(net, calculate_voltage_angles=calculate_voltage_angles,
                      trafo_model=trafo_model, check_connectivity=check_connectivity,
                      mode=mode, switch_rx_ratio=switch_rx_ratio, init_vm_pu=init,
-                     init_va_degree=init, enforce_q_lims=enforce_q_lims, recycle=recycle,
+                     init_va_degree=init, enforce_p_lims=enforce_p_lims, enforce_q_lims=enforce_q_lims, recycle=recycle,
                      voltage_depend_loads=False, delta=0, trafo3w_losses=trafo3w_losses)
     _add_pf_options(net, tolerance_mva=tolerance_mva, trafo_loading=trafo_loading,
                     numba=numba, ac=ac, algorithm=algorithm, max_iteration=max_iteration,
@@ -2264,6 +2268,7 @@ def _init_runopp_options(
     ac: bool = True
     trafo_model: Final = "t"
     trafo_loading: Final = 'current'
+    enforce_p_lims: bool = True
     enforce_q_lims: bool = True
     recycle = None
     only_v_results: bool = False
@@ -2276,7 +2281,7 @@ def _init_runopp_options(
     _add_ppc_options(net, calculate_voltage_angles=calculate_voltage_angles,
                      trafo_model=trafo_model, check_connectivity=check_connectivity,
                      mode=mode, switch_rx_ratio=switch_rx_ratio, init_vm_pu=init,
-                     init_va_degree=init, enforce_q_lims=enforce_q_lims, recycle=recycle,
+                     init_va_degree=init, enforce_p_lims=enforce_p_lims, enforce_q_lims=enforce_q_lims, recycle=recycle,
                      voltage_depend_loads=kwargs.get("voltage_depend_loads", False),
                      delta=delta, trafo3w_losses=trafo3w_losses,
                      consider_line_temperature=consider_line_temperature)
@@ -2299,6 +2304,7 @@ def _init_rundcopp_options(
     trafo_model: Final = "t"
     trafo_loading: Final = 'current'
     calculate_voltage_angles: bool = True
+    enforce_p_lims: bool = True
     enforce_q_lims: bool = True
     recycle = None
     only_v_results: bool = False
@@ -2310,7 +2316,7 @@ def _init_rundcopp_options(
     _add_ppc_options(net, calculate_voltage_angles=calculate_voltage_angles,
                      trafo_model=trafo_model, check_connectivity=check_connectivity,
                      mode=mode, switch_rx_ratio=switch_rx_ratio, init_vm_pu=init,
-                     init_va_degree=init, enforce_q_lims=enforce_q_lims, recycle=recycle,
+                     init_va_degree=init, enforce_p_lims=enforce_p_lims, enforce_q_lims=enforce_q_lims, recycle=recycle,
                      voltage_depend_loads=False, delta=delta, trafo3w_losses=trafo3w_losses)
     _add_opf_options(net, trafo_loading=trafo_loading, init=init, ac=ac,
                      only_v_results=only_v_results,
@@ -2337,7 +2343,7 @@ def _init_runse_options(
     _add_ppc_options(net, calculate_voltage_angles=calculate_voltage_angles,
                      trafo_model=trafo_model, check_connectivity=check_connectivity,
                      mode="se", switch_rx_ratio=switch_rx_ratio, init_vm_pu=v_start,
-                     init_va_degree=delta_start, enforce_q_lims=False, recycle=None,
+                     init_va_degree=delta_start, enforce_q_lims=False, enforce_p_lims=False, recycle=None,
                      voltage_depend_loads=False, trafo3w_losses=trafo3w_losses)
     _add_pf_options(net, tolerance_mva=1e-8, trafo_loading="power",
                     numba=True, ac=True, algorithm="nr", max_iteration="auto",
