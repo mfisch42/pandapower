@@ -80,6 +80,9 @@ def get_structure_dict() -> dict:
             "q_b_mvar": "f8",
             "p_c_mw": "f8",
             "q_c_mvar": "f8",
+            "sn_a_mva": "f8",
+            "sn_b_mva": "f8",
+            "sn_c_mva": "f8",
             "sn_mva": "f8",
             "scaling": "f8",
             "in_service": "bool",
@@ -94,6 +97,9 @@ def get_structure_dict() -> dict:
             "q_b_mvar": "f8",
             "p_c_mw": "f8",
             "q_c_mvar": "f8",
+            "sn_a_mva": "f8",
+            "sn_b_mva": "f8",
+            "sn_c_mva": "f8",
             "sn_mva": "f8",
             "scaling": "f8",
             "in_service": "bool",
@@ -414,7 +420,7 @@ def get_structure_dict() -> dict:
             "controllable": "bool",
             "type": dtype(object),
         },
-        "b2b_vsc": {
+        "vsc_stacked": {
             "name": dtype(object),
             "bus": "u4",
             "bus_dc_plus": "u4",
@@ -430,7 +436,7 @@ def get_structure_dict() -> dict:
             "controllable": "bool",
             "in_service": "bool",
         },
-        "_empty_res_b2b_vsc": {
+        "_empty_res_vsc_stacked": {
             "p_mw": "f8",
             "q_mvar": "f8",
             "p_dc_mw_p": "f8",
@@ -444,7 +450,7 @@ def get_structure_dict() -> dict:
             "vm_dc_pu_p": "f8",
             "vm_dc_pu_m": "f8",
         },
-        "bi_vsc": {
+        "vsc_bipolar": {
             "name": dtype(object),
             "bus": "u4",
             "bus_dc_plus": "u4",
@@ -453,14 +459,13 @@ def get_structure_dict() -> dict:
             "x_ohm": "f8",
             "r_dc_ohm": "f8",
             "pl_dc_mw": "f8",
-            "control_mode_ac": dtype(object),
-            "control_value_ac": "f8",
-            "control_mode_dc": dtype(object),
-            "control_value_dc": "f8",
+            "control_mode": dtype(object),
+            "control_value_1": "f8",
+            "control_value_2": "f8",
             "controllable": "bool",
             "in_service": "bool",
         },
-        "_empty_res_bi_vsc": {
+        "_empty_res_vsc_bipolar": {
             "p_mw": "f8",
             "q_mvar": "f8",
             "p_dc_mw_p": "f8",

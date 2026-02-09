@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 by University of Kassel and Fraunhofer Institute for Energy Economics
+# Copyright (c) 2016-2026 by University of Kassel and Fraunhofer Institute for Energy Economics
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 
 from numpy import nan_to_num, array, allclose, int64, concatenate
@@ -40,7 +40,7 @@ def _powerflow(net, **kwargs):
     _add_auxiliary_elements(net)  # create gen elements for start and end buses of dcline
 
     if not ac or net["_options"]["init_results"]:
-        verify_results(net)
+        verify_results(net, mode='pf' if ac else 'dc')
     else:
         init_results(net)
 

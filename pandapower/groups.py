@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 by University of Kassel and Fraunhofer Institute for Energy Economics
+# Copyright (c) 2016-2026 by University of Kassel and Fraunhofer Institute for Energy Economics
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 
 
@@ -1167,15 +1167,3 @@ def elements_connected_to_group(net, index, element_types, find_buses_only_from_
         return connected
     else:
         return {key: val for key, val in connected.items() if len(val)}
-
-
-if __name__ == "__main__":
-    from pandapower import create_buses, create_gens, create_group, count_group_elements
-
-    net = create_empty_network()
-    create_buses(net, 3, 10)
-    create_gens(net, [0]*5, [10]*5)
-    create_group(net, ["bus", "gen"], [[2, 1], [1, 2]], name="hello")
-    create_group(net, "bus", [[0]], name="hello")
-    print(net.group)
-    print(count_group_elements(net, 0))

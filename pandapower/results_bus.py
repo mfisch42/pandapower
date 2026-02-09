@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 by University of Kassel and Fraunhofer Institute for Energy Economics
+# Copyright (c) 2016-2026 by University of Kassel and Fraunhofer Institute for Energy Economics
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def _set_buses_out_of_service(ppc):
-    disco = np.where(ppc["bus"][:, BUS_TYPE] == NONE)[BUS_I]
+    disco = np.nonzero(ppc["bus"][:, BUS_TYPE] == NONE)[BUS_I]
     ppc["bus"][disco, VM] = np.nan
     ppc["bus"][disco, VA] = np.nan
     ppc["bus"][disco, PD] = 0
@@ -31,7 +31,7 @@ def _set_buses_out_of_service(ppc):
 
 
 def _set_dc_buses_out_of_service(ppc):
-    disco = np.where(ppc["bus_dc"][:, DC_BUS_TYPE] == DC_NONE)[DC_BUS_I]
+    disco = np.nonzero(ppc["bus_dc"][:, DC_BUS_TYPE] == DC_NONE)[DC_BUS_I]
     ppc["bus_dc"][disco, DC_VM] = np.nan
     ppc["bus_dc"][disco, DC_PD] = 0
 
@@ -232,7 +232,28 @@ def write_pq_results_to_element(net, ppc, element, suffix=None):
     element_in_service = _is_elements[element]
 
     # P result in mw to element
-    net[res_]["p_mw"].values[:] = el_data[p_mw].values * scaling * element_in_service
+    if element == "sgen" and net._options["enforce_p_lims"]:
+        min_p = el_data["min_p_mw"] if "min_p_mw" in el_data.columns else pd.Series(index=el_data.index, data=np.nan,
+                                                                                    dtype=float)
+        max_p = el_data["max_p_mw"] if "max_p_mw" in el_data.columns else pd.Series(index=el_data.index, data=np.nan,
+                                                                                    dtype=float)
+        p_src = el_data[p_mw].clip(lower=min_p, upper=max_p).values
+
+        # detect clipping
+        orig_p = el_data[p_mw].values
+        clipped_mask = ~np.isclose(orig_p, p_src, equal_nan=True)
+        if np.any(clipped_mask):
+            # debug log message notifying user of p clipping
+            logger.debug(
+                "Active power limits enforced for %s elements at indices %s",
+                element,
+                el_data.index[clipped_mask].tolist(),
+            )
+    else:
+        p_src = el_data[p_mw].values
+
+    net[res_]["p_mw"].values[:] = p_src * scaling * element_in_service
+
     if is_controllable:
         net[res_].loc[controlled_elements, "p_mw"] = ppc["gen"][gen_idx, PG] * gen_sign
 
@@ -242,7 +263,32 @@ def write_pq_results_to_element(net, ppc, element, suffix=None):
 
     if ac:
         # Q result in mvar to element
-        net[res_]["q_mvar"].values[:] = el_data[q_mvar].values * scaling * element_in_service
+        if element == "sgen" and net._options["enforce_q_lims"]:
+            if "min_q_mvar" in el_data.columns:
+                min_q = el_data["min_q_mvar"].copy()
+            else:
+                min_q = pd.Series(index=el_data.index, data=np.nan, dtype=float)
+            if "max_q_mvar" in el_data.columns:
+                max_q = el_data["max_q_mvar"].copy()
+            else:
+                max_q = pd.Series(index=el_data.index, data=np.nan, dtype=float)
+            q_src = el_data[q_mvar].clip(lower=min_q, upper=max_q).values
+
+            # detect clipping
+            orig_q = el_data[q_mvar].values
+            clipped_mask = ~np.isclose(orig_q, q_src, equal_nan=True)
+            if np.any(clipped_mask):
+                # debug log message notifying user of q clipping
+                logger.debug(
+                    "Reactive power limits enforced for %s elements at indices %s",
+                    element,
+                    el_data.index[clipped_mask].tolist(),
+                )
+        else:
+            q_src = el_data[q_mvar].values
+
+        net[res_]["q_mvar"].values[:] = q_src * scaling * element_in_service
+
         if is_controllable:
             net[res_].loc[controlled_elements, "q_mvar"] = ppc["gen"][gen_idx, QG] * gen_sign
     else:

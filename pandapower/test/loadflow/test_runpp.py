@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 by University of Kassel and Fraunhofer Institute for Energy Economics
+# Copyright (c) 2016-2026 by University of Kassel and Fraunhofer Institute for Energy Economics
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 
 
@@ -351,7 +351,7 @@ def get_isolated(net):
     _add_ppc_options(net, calculate_voltage_angles=False,
                      trafo_model="t", check_connectivity=False,
                      mode="pf", switch_rx_ratio=2, init_vm_pu="flat",
-                     init_va_degree="flat",
+                     init_va_degree="flat", enforce_p_lims=False,
                      enforce_q_lims=False, recycle=None)
 
     ppc, ppci = _pd2ppc(net)

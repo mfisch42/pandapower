@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 by University of Kassel and Fraunhofer Institute for Energy Economics
+# Copyright (c) 2016-2026 by University of Kassel and Fraunhofer Institute for Energy Economics
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 
 import copy
@@ -649,6 +649,10 @@ class FromSerializableRegistry():
                               (self.obj, module.__name__))
         class_ = getattr(module, self.obj)  # works
         return class_
+    
+    @from_serializable.register(class_name='bool', module_name='numpy')
+    def bool_handling(self):
+        return bool(self.obj)
 
     @from_serializable.register()
     def rest(self):

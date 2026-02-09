@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 by University of Kassel and Fraunhofer Institute for Energy Economics
+# Copyright (c) 2016-2026 by University of Kassel and Fraunhofer Institute for Energy Economics
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 
 
@@ -167,8 +167,7 @@ def _get_line_dc_results(net, ppc):
     # create res_line_vals which are written to the pandas dataframe
     if "line_dc" not in net._pd2ppc_lookups["branch_dc"]:
         return
-    ac = net["_options"]["ac"]
-    if not ac:
+    if net["_options"]["mode"] != "pf" and net["_options"]["mode"] != "dc":
         return
 
     f, t = net._pd2ppc_lookups["branch_dc"]["line_dc"]
