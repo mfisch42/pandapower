@@ -58,7 +58,7 @@ def test_networks(eq_type, sn_mva, net_func, boundary_buses, internal_buses, ret
     logging.debug(f'test with {net_func.__name__}:')
     net = net_func()
     net.sn_mva = sn_mva
-    
+
     va_degree = net_func.__name__ == "case118" and eq_type != "xward"
 
     max_error, related_values = get_max_error(
@@ -75,9 +75,9 @@ def get_max_error(net, eq_type, boundary_buses, internal_buses, return_internal,
             create_switch(net, bus=switch_changes[i][1], element=switch_changes[i][2], et=switch_changes[i][0])
     runpp(net)
     #  --- get net_eq
-    net_eq = get_equivalent(net, eq_type, boundary_buses, internal_buses,
-                            return_internal=return_internal,
-                            calculate_voltage_angles=True)
+    net_eq = get_equivalent(
+        net, eq_type, boundary_buses, internal_buses, return_internal=return_internal, calculate_voltage_angles=True
+    )
 
     # --- calulate max. error
     max_error, related_values = calc_max_error(net, net_eq, return_internal, **kwargs)
@@ -98,16 +98,18 @@ def calc_max_error(net_org, net_eq, return_internal, va_degree=True):
 
         if len(related_buses):
             for para in res_bus_parameter_to_compare:
-                max_para_error = max(abs(net_eq.res_bus[para][related_buses].values -
-                                         net_org.res_bus[para][related_buses].values))
+                max_para_error = max(
+                    abs(net_eq.res_bus[para][related_buses].values - net_org.res_bus[para][related_buses].values)
+                )
                 if max_para_error > max_error:
                     max_error = max_para_error
                     related_values = para
     else:
         related_buses = net_eq.bus_lookups["bus_lookup_pd"]["b_area_buses"]
         for para in ["vm_pu"]:
-            max_para_error = max(abs(net_eq.res_bus[para][related_buses].values -
-                                     net_org.res_bus[para][related_buses].values))
+            max_para_error = max(
+                abs(net_eq.res_bus[para][related_buses].values - net_org.res_bus[para][related_buses].values)
+            )
             if max_para_error > max_error:
                 max_error = max_para_error
                 related_values = para
