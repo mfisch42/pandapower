@@ -29,6 +29,7 @@ Change Log
 - [ADDED] check to check if vkr_percent values are reasonable (see issue #786).
 - [FIXED] cim2pp shift_lv_degree was translated from wrong entry
 - [FIXED] UnboundLocalError in _from_ppc_branch when creating impedance elements
+- [FIXED] incompatible network versions (i.e. networks with newer format versions than the currently installed pandapower version) are identified in convert_format and raise an error
 - [ADDED] LTDS support
 - [FIXED] ucte2pp: voltage setpoints from gens connected to the same busbar are now averaged
 - [FIXED] ucte2pp: small X values are clipped to 0.05 Ohm (according to UCTE-DEF) to increase convergence
