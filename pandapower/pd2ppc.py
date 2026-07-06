@@ -45,17 +45,9 @@ def _pd2ppc_recycle(net, sequence, recycle):
         # update pq values in bus
         _calc_pq_elements_and_add_on_ppc(net, ppc, sequence=sequence)
 
-    # if "trafo" in recycle and recycle["trafo"]:
-    #     # update trafo in branch and Ybus
-    #     lookup = net._pd2ppc_lookups["branch"]
-    #     if "trafo" in lookup:
-    #         _calc_trafo_parameter(net, ppc)
-    #     if "trafo3w" in lookup:
-    #         _calc_trafo3w_parameter(net, ppc)
-
     if "gen" in recycle and recycle["gen"]:
         # updates the ppc["gen"] part
-        _build_gen_ppc(net, ppc)
+        _build_gen_ppc(net, ppc, sequence)
         ppc["gen"] = np.nan_to_num(ppc["gen"])
 
     ppci = _ppc2ppci(ppc, net)
@@ -208,7 +200,7 @@ def _pd2ppc(net, sequence=None, **kwargs):
     if "pf" in mode or "se" in mode or "dc" in mode:
         _check_for_reference_bus(ppc)
 
-    _build_gen_ppc(net, ppc)
+    _build_gen_ppc(net, ppc, sequence=sequence)
 
     _replace_nans_with_default_limits(net, ppc)
 
@@ -263,7 +255,7 @@ def _init_ppc(net, mode="pf", sequence=None):
     if mode == "opf":
         # additional fields in ppc
         ppc["gencost"] = np.array([], dtype=float)
-    net["_ppc"] = ppc
+        net["_ppc"] = ppc
 
     if sequence is None:
         net["_ppc"] = ppc
@@ -337,9 +329,8 @@ def _ppc2ppci(ppc, net, ppci=None):
     # update lookups (pandapower -> ppci internal)
     _update_lookup_entries(net, bus_dc_lookup, e2i_dc, "bus_dc")
 
-    if 'areas' in ppc:
-        if len(ppc["areas"]) == 0:  # if areas field is empty
-            del ppc['areas']  # delete it (so it's ignored)
+    if 'areas' in ppc and len(ppc["areas"]) == 0:  # if areas field is empty
+        del ppc['areas']  # delete it (so it's ignored)
 
     # bus types
     bus_type = ppc["bus"][:, BUS_TYPE]

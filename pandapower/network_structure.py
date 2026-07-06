@@ -153,7 +153,7 @@ def get_structure_dict() -> dict:
             "q_mvar": "f8",
             "p_mw": "f8",
             "vn_kv": "f8",
-            "step": "u4",
+            "step": "f8",
             "max_step": "u4",
             "id_characteristic_table": pd.Int64Dtype(),
             "step_dependency_table": "bool",
@@ -389,6 +389,8 @@ def get_structure_dict() -> dict:
             "cq0_eur": "f8",
             "cq1_eur_per_mvar": "f8",
             "cq2_eur_per_mvar2": "f8",
+            "redispatch_up_eur_per_mw": "f8",
+            "redispatch_down_eur_per_mw": "f8",
         },
         "controller": {
             "object": dtype(object),
@@ -436,20 +438,6 @@ def get_structure_dict() -> dict:
             "controllable": "bool",
             "in_service": "bool",
         },
-        "_empty_res_vsc_stacked": {
-            "p_mw": "f8",
-            "q_mvar": "f8",
-            "p_dc_mw_p": "f8",
-            "p_dc_mw_m": "f8",
-            "vm_internal_pu": "f8",
-            "vm_internal_degree": "f8",
-            "vm_pu": "f8",
-            "va_degree": "f8",
-            "vm_internal_dc_pu_p": "f8",
-            "vm_internal_dc_pu_m": "f8",
-            "vm_dc_pu_p": "f8",
-            "vm_dc_pu_m": "f8",
-        },
         "vsc_bipolar": {
             "name": dtype(object),
             "bus": "u4",
@@ -465,6 +453,21 @@ def get_structure_dict() -> dict:
             "controllable": "bool",
             "in_service": "bool",
         },
+        # result tables
+        "_empty_res_vsc_stacked": {
+            "p_mw": "f8",
+            "q_mvar": "f8",
+            "p_dc_mw_p": "f8",
+            "p_dc_mw_m": "f8",
+            "vm_internal_pu": "f8",
+            "vm_internal_degree": "f8",
+            "vm_pu": "f8",
+            "va_degree": "f8",
+            "vm_internal_dc_pu_p": "f8",
+            "vm_internal_dc_pu_m": "f8",
+            "vm_dc_pu_p": "f8",
+            "vm_dc_pu_m": "f8",
+        },
         "_empty_res_vsc_bipolar": {
             "p_mw": "f8",
             "q_mvar": "f8",
@@ -479,7 +482,6 @@ def get_structure_dict() -> dict:
             "vm_dc_pu_p": "f8",
             "vm_dc_pu_m": "f8",
         },
-        # result tables
         "_empty_res_bus": {
             "vm_pu": "f8",
             "va_degree": "f8",
@@ -782,6 +784,20 @@ def get_structure_dict() -> dict:
             "q_b_mvar": "f8",
             "q_c_mvar": "f8",
         },
+        "_empty_res_gen_3ph": {
+            "vm_a_pu": "f8",
+            "va_a_degree": "f8",
+            "vm_b_pu": "f8",
+            "va_b_degree": "f8",
+            "vm_c_pu": "f8",
+            "va_c_degree": "f8",
+            "p_a_mw": "f8",
+            "q_a_mvar": "f8",
+            "p_b_mw": "f8",
+            "q_b_mvar": "f8",
+            "p_c_mw": "f8",
+            "q_c_mvar": "f8",
+        },
         "_empty_res_gen": {
             "p_mw": "f8",
             "q_mvar": "f8",
@@ -818,6 +834,8 @@ def get_structure_dict() -> dict:
         "f_hz": 50.0,
         "sn_mva": 1,
     }
+
+
 def get_std_type_structure_dict() -> dict:
     """
     This function returns the structure dict of the std_types

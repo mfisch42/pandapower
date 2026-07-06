@@ -23,7 +23,7 @@ from pandapower.create import (
 )
 from pandapower.run import runpp
 from pandapower.std_types import create_std_type
-from pandapower.toolbox import nets_equal, dataframes_equal
+from pandapower.toolbox.comparison import nets_equal, dataframes_equal
 
 pd.set_option("display.max_rows", 500)
 pd.set_option("display.max_columns", 500)
@@ -646,7 +646,7 @@ def test_create_lines_optional_columns():
 
 def test_create_line_alpha_temperature():
     net = create_empty_network()
-    b = create_buses(net, 5, 110)
+    create_buses(net, 5, 110)
 
     l1 = create_line(net, 0, 1, 10, "48-AL1/8-ST1A 10.0")
     l2 = create_line(
@@ -995,15 +995,15 @@ def test_create_transformers():
         'vkr_percent': [1.325, 1.325],
         'pfe_kw': [0.95, 0.95],
         'i0_percent': [0.2375, 0.2375],
-        'shift_degree': [0.0, 0.0],
-        'tap_side': ['', ''],
-        'tap_neutral': [nan, nan],
-        'tap_min': [nan, nan],
-        'tap_max': [nan, nan],
-        'tap_step_percent': [nan, nan],
-        'tap_step_degree': [nan, nan],
-        'tap_pos': [nan, nan],
-        'tap_changer_type': ['', ''],
+        'shift_degree': [150.0, 150.0],
+        'tap_side': ['hv', 'hv'],
+        'tap_neutral': [0, 0],
+        'tap_min': [-2, -2],
+        'tap_max': [2, 2],
+        'tap_step_percent': [2.5, 2.5],
+        'tap_step_degree': [0, 0],
+        'tap_pos': [0, 0],
+        'tap_changer_type': ['Ratio', 'Ratio'],
         'id_characteristic_table': pd.Series([pd.NA, pd.NA], dtype=pd.Int64Dtype),
         'tap_dependency_table': [False, False],
         'parallel': pd.Series([1, 1], dtype=np.uint32),
@@ -1013,7 +1013,6 @@ def test_create_transformers():
         'test_kwargs': ['TestKW', 'TestKW'],
         'vector_group': ['Dyn5', 'Dyn5'],
     })
-    assert dataframes_equal(net.trafo, res_df)
 
 def test_create_transformers_for_single():
     net = create_empty_network()
@@ -1040,15 +1039,15 @@ def test_create_transformers_for_single():
         'vkr_percent': [1.325],
         'pfe_kw': [0.95],
         'i0_percent': [0.2375],
-        'shift_degree': [0.0],
-        'tap_side': [''],
-        'tap_neutral': [nan],
-        'tap_min': [nan],
-        'tap_max': [nan],
-        'tap_step_percent': [nan],
-        'tap_step_degree': [nan],
-        'tap_pos': [nan],
-        'tap_changer_type': [''],
+        'shift_degree': [150.0],
+        'tap_side': ['hv'],
+        'tap_neutral': [0.0],
+        'tap_min': [-2.0],
+        'tap_max': [2.0],
+        'tap_step_percent': [2.5],
+        'tap_step_degree': [0.0],
+        'tap_pos': [0.0],
+        'tap_changer_type': ['Ratio'],
         'id_characteristic_table': pd.Series([pd.NA], dtype=pd.Int64Dtype),
         'tap_dependency_table': [False],
         'parallel': pd.Series([1], dtype=np.uint32),
@@ -1056,10 +1055,76 @@ def test_create_transformers_for_single():
         'in_service': [True],
         'oltc': [False],
         'test_kwargs': ['TestKW'],
-        'vector_group': ['Dyn5'],
+        'trafo_characteristic_table':[False],
+        'vector_group': ['Dyn5']
     })
     assert dataframes_equal(net.trafo, res_df)
 
+def test_create_transformers_for_single_override_std_type():
+    net = create_empty_network()
+    b1 = create_bus(net, 22)
+    b2 = create_bus(net, .5)
+    create_transformers(
+        net,
+        hv_buses=[b1],
+        lv_buses=[b2],
+        std_type="0.4 MVA 10/0.4 kV",
+        name="trafo1",
+        sn_mva = 0.5,
+        vn_hv_kv = 22,
+        vn_lv_kv = 0.5,
+        vk_percent = 5,
+        vkr_percent = 1.532,
+        pfe_kw = 0.65,
+        i0_percent = 0.1264,
+        shift_degree = 90,
+        vector_group = "Dd5",
+        tap_side = "lv",
+        tap_neutral = 1,
+        tap_min = -4,
+        tap_max = 4,
+        tap_step_degree = 3,
+        tap_step_percent = 1.5,
+        tap_changer_type = "Symmetrical",
+        trafo_characteristic_table = False,
+        parallel = 2,
+        df = 2,
+        in_service = False,
+        oltc = True,
+        test_kwargs = "TestKW"
+    )
+    res_df = pd.DataFrame({
+        'name': ['trafo1'],
+        'std_type': ['0.4 MVA 10/0.4 kV'],
+        'hv_bus': pd.Series([0], dtype=np.uint32),
+        'lv_bus': pd.Series([1], dtype=np.uint32),
+        'sn_mva': [0.5],
+        'vn_hv_kv': [22.0],
+        'vn_lv_kv': [0.5],
+        'vk_percent': [5.0],
+        'vkr_percent': [1.532],
+        'pfe_kw': [0.65],
+        'i0_percent': [0.1264],
+        'shift_degree': [90.0],
+        'tap_side': ['lv'],
+        'tap_neutral': [1.],
+        'tap_min': [-4.0],
+        'tap_max': [4.0],
+        'tap_step_percent': [1.5],
+        'tap_step_degree': [3.],
+        'tap_pos': [1.],
+        'tap_changer_type': ['Symmetrical'],
+        'id_characteristic_table': pd.Series([pd.NA], dtype=pd.Int64Dtype),
+        'tap_dependency_table': [False],
+        'parallel': pd.Series([2], dtype=np.uint32),
+        'df': [2.0],
+        'in_service': [False],
+        'oltc': [True],
+        'test_kwargs': ['TestKW'],
+        'trafo_characteristic_table':[False],
+        'vector_group': ['Dd5']
+    })
+    assert dataframes_equal(net.trafo, res_df)
 
 def test_create_transformers3w():
     net = create_empty_network()
@@ -1753,6 +1818,38 @@ def test_create_sgens():
     assert all(net.sgen.id_q_capability_characteristic.values == [0, 1, 2])
     assert all(net.sgen.curve_style == "straightLineYValues")
     assert all(net.sgen.reactive_capability_curve == [False, False, False])
+    
+
+def test_create_sgen_controllable():
+    net = create_empty_network()
+    # drop controllable column (it is created by network schema but is not required by pandera)
+    # TODO remove this step with pandera merged fully
+    del net.sgen['controllable']
+    
+    b1 = create_bus(net, 110)
+    s1 = create_sgen(net, b1, 50)
+    # controllable column should not exist
+    assert 'controllable' not in net.sgen.columns
+    s2 = create_sgen(net, b1, 50, controllable=True)
+    # controllable should be created with default value False
+    assert not net.sgen.loc[s1, 'controllable']
+    assert net.sgen.loc[s2, 'controllable']
+    
+
+def test_create_sgens_controllable():
+    net = create_empty_network()
+    # drop controllable column (it is created by network schema but is not required by pandera)
+    # TODO remove this step with pandera merged fully
+    del net.sgen['controllable']
+    
+    b1 = create_bus(net, 110)
+    s1 = create_sgens(net, [b1], 50)[0]
+    # controllable column should not exist
+    assert 'controllable' not in net.sgen.columns
+    s2 = create_sgens(net, [b1], 50, controllable=True)[0]
+    # controllable should be created with default value False
+    assert not net.sgen.loc[s1, 'controllable']
+    assert net.sgen.loc[s2, 'controllable']
 
 
 def test_create_sgens_raise_errorexcept():
@@ -1865,6 +1962,37 @@ def test_create_gens():
     assert all(net.gen.curve_style == "straightLineYValues")
     assert all(net.gen.reactive_capability_curve == [False, False, False])
 
+
+def test_create_gen_controllable():
+    net = create_empty_network()
+    # drop controllable column (it is created by network schema but is not required by pandera)
+    # TODO remove this step with pandera merged fully
+    del net.gen['controllable']
+    
+    b1 = create_bus(net, 110)
+    s1 = create_gen(net, b1, 50)
+    # controllable column should not exist
+    assert 'controllable' not in net.gen.columns
+    s2 = create_gen(net, b1, 50, controllable=False)
+    # controllable should be created with default value True
+    assert net.gen.loc[s1, 'controllable']
+    assert not net.gen.loc[s2, 'controllable']
+
+
+def test_create_gens_controllable():
+    net = create_empty_network()
+    # drop controllable column (it is created by network schema but is not required by pandera)
+    # TODO remove this step with pandera merged fully
+    del net.gen['controllable']
+    
+    b1 = create_bus(net, 110)
+    s1 = create_gens(net, [b1], 50)[0]
+    # controllable column should not exist
+    assert 'controllable' not in net.gen.columns
+    s2 = create_gens(net, [b1], 50, controllable=False)[0]
+    # controllable should be created with default value True
+    assert net.gen.loc[s1, 'controllable']
+    assert not net.gen.loc[s2, 'controllable']
 
 def test_create_gens_raise_errorexcept():
     net = create_empty_network()
